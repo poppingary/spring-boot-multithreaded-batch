@@ -1,15 +1,19 @@
 package org.example.demo.service;
 
 import jakarta.transaction.Transactional;
+import org.example.demo.dto.ProcessDiscountRequest;
 import org.example.demo.entity.Product;
 import org.example.demo.handler.ProductDataGenerator;
 import org.example.demo.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
+    private static final int BATCH_SIZE = 10000;
+
     private final ProductRepository productRepository;
     private final ProductDataGenerator productDataGenerator;
 
@@ -30,23 +34,20 @@ public class ProductService {
     }
 
     private void batchInsertProducts(List<Product> products) {
-        int batchSize = 50;
-        for (int i = 0; i < products.size(); i += batchSize) {
-            int end = Math.min(i + batchSize, products.size());
+        for (int i = 0; i < products.size(); i += BATCH_SIZE) {
+            int end = Math.min(i + BATCH_SIZE, products.size());
             List<Product> batch = products.subList(i, end);
             productRepository.saveAll(batch);
         }
     }
 
-    @Transactional
-    public String resetProductRecords() {
-        productRepository.findAll()
-                .forEach(product -> {
-                    product.setOfferApplied(false);
-                    product.setPriceAfterDiscount(product.getPrice());
-                    product.setDiscountPercentage(0);
-                    productRepository.save(product);
-                });
-        return "Product records reset successfully";
+    public void resetProductRecords() {
+        productRepository.resetProducts();
+    }
+
+    public void processDiscount(List<ProcessDiscountRequest> processDiscountRequests) {
+        productRepository.updateDiscounts(processDiscountRequests.parallelStream()
+                .map(ProcessDiscountRequest::getId)
+                .collect(Collectors.toList()));
     }
 }

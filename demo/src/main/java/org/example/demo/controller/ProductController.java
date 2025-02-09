@@ -1,9 +1,12 @@
 package org.example.demo.controller;
 
+import org.example.demo.dto.ProcessDiscountRequest;
 import org.example.demo.dto.ProductCountRequest;
 import org.example.demo.service.ProductService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
@@ -29,7 +32,13 @@ public class ProductController {
 
     @PostMapping("/reset")
     public ResponseEntity<String> resetProductRecords() {
-        String response = productService.resetProductRecords();
-        return ResponseEntity.ok(response);
+        productService.resetProductRecords();
+        return ResponseEntity.ok("Product records reset successfully");
+    }
+
+    @PostMapping("/process/discount")
+    public ResponseEntity<String> processDiscount(@RequestBody List<ProcessDiscountRequest> processDiscountRequests) {
+        productService.processDiscount(processDiscountRequests);
+        return ResponseEntity.ok("Discount applied successfully");
     }
 }

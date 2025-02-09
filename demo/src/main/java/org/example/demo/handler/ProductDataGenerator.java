@@ -3,6 +3,8 @@ package org.example.demo.handler;
 import org.example.demo.entity.Product;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -81,6 +83,11 @@ public class ProductDataGenerator {
     }
 
     private double generatePrice(String category, Random random) {
+        double price = generatePriceWithoutRoundDown(category, random);
+        return BigDecimal.valueOf(price).setScale(2, RoundingMode.HALF_DOWN).doubleValue();
+    }
+
+    private double generatePriceWithoutRoundDown(String category, Random random) {
         return switch (category) {
             case "Electronics" -> 50 + random.nextDouble() * 1000;
             case "Computers" -> 300 + random.nextDouble() * 2500;
