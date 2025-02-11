@@ -30,7 +30,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("UPDATE Product p " +
             "SET p.discountPercentage = CASE WHEN p.price >= 1000 THEN 10 WHEN p.price > 500 THEN 5 ELSE 0 END, " +
             "    p.isOfferApplied = CASE WHEN p.price >= 1000 OR p.price > 500 THEN true ELSE false END, " +
-            "    p.priceAfterDiscount = p.price - (p.price * (CASE WHEN p.price >= 1000 THEN 10 WHEN p.price > 500 THEN 5 ELSE 0 END) / 100) " +
+            "    p.priceAfterDiscount = FUNCTION('ROUND', p.price - (p.price * (CASE WHEN p.price >= 1000 THEN 10 WHEN p.price > 500 THEN 5 ELSE 0 END) / 100), 2) " +
             "WHERE p.id IN :ids")
     void updateDiscounts(@Param("ids") List<Long> ids);
 }
